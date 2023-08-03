@@ -15,16 +15,19 @@ def get_metadata(host, user, password, database):
         cursor = db.cursor()
 
         # Get the metadata
-        cursor.execute("SELECT TABLE_NAME, COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s", (database,))
+        cursor.execute(
+            "SELECT TABLE_NAME, COLUMN_NAME, COLUMN_KEY, IS_NULLABLE, COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s",
+            (database,))
         rows = cursor.fetchall()
+
 
         metadata = {}
         for row in rows:
-            table_name = row[0]  # Changed from row['TABLE_NAME']
-            column_name = row[1]  # Changed from row['COLUMN_NAME']
-            primary_key = row[2] == 'PRI'  # Changed from row['COLUMN_KEY']
-            nullable = row[3] == 'YES'  # Changed from row['IS_NULLABLE']
-            data_type = row[4]  # Changed from row['COLUMN_TYPE']
+            table_name = row[0]
+            column_name = row[1]
+            primary_key = row[2] == 'PRI'
+            nullable = row[3] == 'YES'
+            data_type = row[4]
 
             if table_name not in metadata:
                 metadata[table_name] = {}
@@ -52,10 +55,10 @@ def get_metadata(host, user, password, database):
 
         relations = {}
         for row in rows:
-            table_name = row[0]  # Changed from row['TABLE_NAME']
-            column_name = row[1]  # Changed from row['COLUMN_NAME']
-            ref_table_name = row[2]  # Changed from row['REFERENCED_TABLE_NAME']
-            ref_column_name = row[3]  # Changed from row['REFERENCED_COLUMN_NAME']
+            table_name = row[0]
+            column_name = row[1]
+            ref_table_name = row[2]
+            ref_column_name = row[3]
 
             if table_name not in relations:
                 relations[table_name] = {}
@@ -74,7 +77,6 @@ def get_metadata(host, user, password, database):
     finally:
         if db:
             db.close()
-
 
 
 if __name__ == "__main__":
