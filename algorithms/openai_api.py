@@ -20,7 +20,7 @@ metadata_json = json.dumps(metadata, cls=CustomJsonEncoder)
 relations_json = json.dumps(relations, cls=CustomJsonEncoder)
 
 # Create a prompt for the OpenAI API
-prompt = f"The database schema is: {metadata_json}. The relations are: {relations_json}. Please generate SQL queries to retrieve user-specific data."
+prompt = f"I require a comprehensive list of all columns, including their corresponding table names (in the 'table.column' format), that potentially contain personal data. Please utilize the provided metadata, represented as: {metadata_json}. Additionally, consider the following relationship data: {relations_json}. The analysis should be based on both the metadata and relationships to identify potential instances of personal data."
 
 # Set up the OpenAI API
 openai.api_key = OPENAI_API_KEY
