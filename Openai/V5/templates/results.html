@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SQL Query Results</title>
+    <style>
+        body {
+            background-color: #2b2b2b;
+            color: #fff;
+        }
+        /* Weitere Styles hier hinzufügen... */
+    </style>
+</head>
+<body>
+    {% for query, result in query_results %}
+        <h2>{{ query }}</h2>
+        <table>
+            <!-- Insert result rows here. -->
+        </table>
+    {% endfor %}
+</body>
+</html>
