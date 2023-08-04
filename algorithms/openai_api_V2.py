@@ -1,9 +1,25 @@
 import json
 import openai
+import os
 from extract_metadata import get_metadata, CustomJsonEncoder
 
+
+def format_output(output_text):
+    lines = output_text.strip().split('\n')
+    formatted_output = []
+
+    for line in lines:
+        line = line.strip()
+        if line and line not in formatted_output:
+            formatted_output.append(line)
+
+    formatted_output_str = '\n'.join(formatted_output)
+    return formatted_output_str
+
+
 if __name__ == "__main__":
-    openai.api_key = "Your API KEY"
+    OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+    openai.api_key = OPENAI_API_KEY
 
     host = 'localhost'
     user = 'root'
@@ -36,6 +52,7 @@ if __name__ == "__main__":
             results.append(result_text)
 
         final_result = ' '.join(results)
+        final_result = format_output(final_result)
         print(final_result)
     else:
         print("No metadata could be extracted.")
