@@ -1,7 +1,6 @@
 import os
 import openai
 import pymysql
-from tkinter import Tk, Text, Scrollbar, Button, messagebox
 import prettytable
 from extract_metadata import get_metadata, CustomJsonEncoder
 import json
@@ -37,14 +36,11 @@ def chat(system_content, prompt_content):
     return completion["choices"][0]["message"]["content"]
 
 
-def get_relevant_columns(metadata_parameter, relations_parameter):
+def get_queries(metadata_parameter, relations_parameter, first_name, last_name):
     if metadata_parameter and relations_parameter:
         # Remove indent to reduce size of JSON string
         metadata_json = json.dumps(metadata, cls=CustomJsonEncoder)
         relations_json = json.dumps(relations, cls=CustomJsonEncoder)
-
-        first_name = "Diego"
-        last_name = "Freyre"
 
         system_template: str = (
             "Your job is to write queries given a user’s request or do Everything the User wants with the following "
@@ -115,8 +111,11 @@ def run_query(query):
 
 
 if __name__ == "__main__":
+    first_name = input("Enter firstname: ")
+    last_name = input("Enter lastname: ")
+
     metadata, relations = get_metadata(host, user, password, database)
-    sql_queries = get_relevant_columns(metadata, relations)
+    sql_queries = get_queries(metadata, relations, first_name, last_name)
 
     print("Queries: ")
     print(sql_queries)
