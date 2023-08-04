@@ -79,6 +79,6 @@ if __name__ == "__main__":
     database = 'classicmodels'
 
     metadata, relations = get_metadata(host, user, password, database)
-    relevant_columns = get_relevant_columns(metadata, relations)
-    print(relevant_columns)
+    sql_queries = get_relevant_columns(metadata, relations)
+    print(sql_queries)
 
