@@ -55,11 +55,14 @@ def get_queries(metadata_parameter, relations_parameter, first_name, last_name):
         prompt_message = prompt_message.replace("[Lastname]", last_name)
 
         result_text = chat(system_message, prompt_message)
-        results.append(result_text)
+        
+        # Split result_text into separate queries
+        result_queries = result_text.strip().split(';')
+        
+        # Remove any empty queries
+        result_queries = [q.strip() for q in result_queries if q.strip()]
 
-        final_result = ' '.join(results)
-        final_result = format_output(final_result)
-        return final_result
+        return result_queries
     else:
         return None
 
@@ -77,27 +80,24 @@ def format_output(output_text):
     return formatted_output_str
 
 
-def run_query(host, user, password, database, query):
+def run_query(host, user, password, database, queries):
     connection = pymysql.connect(host=host, user=user, password=password, database=database)
     cursor = connection.cursor()
 
     tables = []
     try:
         # Execute each SQL query
-        for q in query.split(";"):
-            if q.strip():  # Skip empty queries
-                cursor.execute(q.strip())
-                result = cursor.fetchall()
+        for query in queries:
+            cursor.execute(query)
+            result = cursor.fetchall()
 
-                # Store the result in a table
-                if result:
-                    table = prettytable.PrettyTable()
-                    table.field_names = [desc[0] for desc in cursor.description]
-                    for row in result:
-                        table.add_row(row)
-                    tables.append(str(table))
-                else:
-                    tables.append("No results for the query.")
+            # Store the result in a table
+            if result:
+                field_names = [desc[0] for desc in cursor.description]
+                table = [dict(zip(field_names, row)) for row in result]
+                tables.append(table)
+            else:
+                tables.append("No results for the query.")
     except Exception as e:
         tables.append(f"Error executing query: {str(e)}")
 
@@ -106,3 +106,4 @@ def run_query(host, user, password, database, query):
     connection.close()
 
     return tables
+
