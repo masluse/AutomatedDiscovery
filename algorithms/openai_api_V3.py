@@ -1,8 +1,7 @@
-import json
-import openai
 import os
+import openai
 from extract_metadata import get_metadata, CustomJsonEncoder
-
+import json
 
 def chat(system_content, prompt_content):
     completion = openai.ChatCompletion.create(
@@ -18,45 +17,45 @@ def chat(system_content, prompt_content):
             }
         ],
         temperature=0,
-        max_tokens=200,
+        max_tokens=600,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
     )
     return completion["choices"][0]["message"]["content"]
 
-
 def get_relevant_columns(metadata_parameter, relations_parameter):
     if metadata_parameter and relations_parameter:
-        metadata_json: str = json.dumps(metadata_parameter, cls=CustomJsonEncoder, indent=2)
-        relations_json: str = json.dumps(relations_parameter, cls=CustomJsonEncoder, indent=2)
+        # Remove indent to reduce size of JSON string
+        metadata_json = json.dumps(metadata, cls=CustomJsonEncoder)
+        relations_json = json.dumps(relations, cls=CustomJsonEncoder)
+
+        first_name = "Diego"
+        last_name = "Freyre"
+
+        system_template: str = (
+            "Your job is to write queries given a user’s request or do Everything the User wants with the following Data. \n Metadata: [METADATA] \n Relations: [RELATIONS]")
 
         prompt_template: str = (
-            "Metadata: [METADATA]\nRelations: [RELATIONS]\nSearch all the data and return all the columns that "
-            "possibly contain personal data.")
-
-        system_template: str = ("You will be provided with database metadata and you will return all columns that "
-                                "contain personal data. Consider the datatype, table name, column name, relations etc."
-                                "Return it in this format: '- customer: first_name, last_name, email, address_id'")
-
-        chunk_size = 1000
-        metadata_chunks = [metadata_json[i:i + chunk_size] for i in range(0, len(metadata_json), chunk_size)]
-        relations_chunks = [relations_json[i:i + chunk_size] for i in range(0, len(relations_json), chunk_size)]
-
+            "You were provided with the Relational Databases Metadata and Relations so can you give me a query that gives me all the information of a customer (the table does not need to have the name customer but it should only be for customer). "
+            "Placeholder for the Firstname and Lastname in the query should be [Firstname] and [Lastname] "
+            "The query should show all the tables that have something to do with the user and the query should be provided like this 'SELECT * FROM something;'"
+            "When You are done Please write on a new line 'Complete!'")
         results = []
-        for metadata_chunk, relations_chunk in zip(metadata_chunks, relations_chunks):
-            prompt_message = prompt_template.replace("[METADATA]", metadata_chunk)
-            prompt_message = prompt_message.replace("[RELATIONS]", relations_chunk)
+        system_message = system_template.replace("[METADATA]", metadata_json)
+        system_message = system_message.replace("[RELATIONS]", relations_json)
 
-            result_text = chat(system_template, prompt_message)
-            results.append(result_text)
+        prompt_message = prompt_template.replace("[Firstname]", first_name)
+        prompt_message = prompt_message.replace("[Lastname]", last_name)
+
+        result_text = chat(system_message, prompt_message)
+        results.append(result_text)
 
         final_result = ' '.join(results)
         final_result = format_output(final_result)
         return final_result
     else:
         return None
-
 
 def format_output(output_text):
     lines = output_text.strip().split('\n')
@@ -70,7 +69,6 @@ def format_output(output_text):
     formatted_output_str = '\n'.join(formatted_output)
     return formatted_output_str
 
-
 if __name__ == "__main__":
     OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
     openai.api_key = OPENAI_API_KEY
@@ -78,8 +76,9 @@ if __name__ == "__main__":
     host = 'localhost'
     user = 'root'
     password = 'root'
-    database = 'sakila'
+    database = 'classicmodels'
 
     metadata, relations = get_metadata(host, user, password, database)
     relevant_columns = get_relevant_columns(metadata, relations)
     print(relevant_columns)
+
