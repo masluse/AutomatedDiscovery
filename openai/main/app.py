@@ -14,18 +14,14 @@ def home():
         last_name = request.form.get('last_name')
         action = request.form.get('action')
 
-        # Extrahieren Sie die Metadaten und Beziehungen aus der Datenbank.
         metadata, relations = openai_api_V5.get_metadata(host, user, password, database)
         
-        # Generieren Sie die SQL-Abfragen.
         api_answer = openai_api_V5.get_queries(metadata, relations, first_name, last_name, action)
         
         if action == "1":
 
-            # Führen Sie die Abfragen aus und erhalten Sie die Ergebnisse.
             results = openai_api_V5.run_query(host, user, password, database, api_answer)
 
-            # Zusammenführen der queries und results in einer Liste von Tupeln
             query_results = list(zip(api_answer, results))
         
             return render_template('results1.html', query_results=query_results)
