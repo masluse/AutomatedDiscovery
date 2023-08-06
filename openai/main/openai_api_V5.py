@@ -31,7 +31,7 @@ def chat(system_content, prompt_content):
     return completion["choices"][0]["message"]["content"]
 
 
-def get_queries(metadata_parameter, relations_parameter, first_name, last_name):
+def get_queries(metadata_parameter, relations_parameter, first_name, last_name, actions):
     results = []
     if metadata_parameter and relations_parameter:
         metadata_json = json.dumps(metadata_parameter, cls=CustomJsonEncoder)
@@ -40,21 +40,26 @@ def get_queries(metadata_parameter, relations_parameter, first_name, last_name):
         system_template: str = (
             "Your task is to construct queries based on a user's request, utilizing the specified Data. "
             "Here's what you need to know: \\n Metadata: [METADATA] \\n Relations: [RELATIONS]. Your responses should align "
-            "with the user's requirements and make use of the given information.")
-
-
-        prompt_template: str = (
-            "You have been provided with Relational Databases Metadata and Relations. Can you craft a query to retrieve all "
-            "information about a person, using placeholders for the Firstname and Lastname as [Firstname] and [Lastname]? "
-            "Your query should include all tables related to the user and adhere to the following format: 'SELECT * FROM table_name;'. "
-            "Please ensure that each query is presented on a separate line and that the response contains only the queries themselves.")
-
-
+            "with the user's requirements and make use of the given information. And only do what is asked of you dont say anything just do the job")
+        
         system_message = system_template.replace("[METADATA]", metadata_json)
         system_message = system_message.replace("[RELATIONS]", relations_json)
 
-        prompt_message = prompt_template.replace("[Firstname]", first_name)
-        prompt_message = prompt_message.replace("[Lastname]", last_name)
+        prompt_message = []
+
+        if actions == "1":
+            prompt_template: str = (
+                "You have been provided with Relational Databases Metadata and Relations. Can you craft a query to retrieve all "
+                "information about a person, using placeholders for the Firstname and Lastname as [Firstname] and [Lastname]? "
+                "Your query should include all tables related to the user and adhere to the following format: 'SELECT * FROM table_name;'. "
+                "Please ensure that each query is presented on a separate line and that the response contains only the queries themselves.")
+            prompt_message = prompt_template.replace("[Firstname]", first_name)
+            prompt_message = prompt_message.replace("[Lastname]", last_name)
+        elif actions == "2":
+            prompt_message: str = (
+                "You have been provided with Relational Databases Metadata and Relations."
+                "Can you give me all Tables and all the attributes that could contain personal data and list them as shown below and dont say anything like 'Based on the provided..' or 'Please note that' neither befor or after just give the information"
+                "1. Tablename1 \n - attributename1 \n - attributename2 \n 2. Tablename2")
 
         result_text = chat(system_message, prompt_message)
         

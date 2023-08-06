@@ -12,20 +12,27 @@ def home():
         database = request.form.get('database')
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
-        
+        action = request.form.get('action')
+
         # Extrahieren Sie die Metadaten und Beziehungen aus der Datenbank.
         metadata, relations = openai_api_V5.get_metadata(host, user, password, database)
         
         # Generieren Sie die SQL-Abfragen.
-        sql_queries = openai_api_V5.get_queries(metadata, relations, first_name, last_name)
+        api_answer = openai_api_V5.get_queries(metadata, relations, first_name, last_name, action)
         
-        # Führen Sie die Abfragen aus und erhalten Sie die Ergebnisse.
-        results = openai_api_V5.run_query(host, user, password, database, sql_queries)
+        if action == "1":
 
-        # Zusammenführen der queries und results in einer Liste von Tupeln
-        query_results = list(zip(sql_queries, results))
+            # Führen Sie die Abfragen aus und erhalten Sie die Ergebnisse.
+            results = openai_api_V5.run_query(host, user, password, database, api_answer)
+
+            # Zusammenführen der queries und results in einer Liste von Tupeln
+            query_results = list(zip(api_answer, results))
         
-        return render_template('results.html', query_results=query_results)
+            return render_template('results1.html', query_results=query_results)
+        
+        if action == "2":
+
+            return render_template('results2.html', sql_queries=api_answer)
     
     return render_template('index.html')
 
