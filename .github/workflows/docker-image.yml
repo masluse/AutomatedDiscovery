@@ -23,13 +23,17 @@ jobs:
           username: masluse
           password: ${{ secrets.DOCKER_TOKEN }}
       -
-        name: Build and push signaling-server
+        name: Get the version
+        id: get_version
+        run: echo "VERSION=$(git describe --tags)" >> $GITHUB_ENV
+      -
+        name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
+          context: .
           file: openai/main/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_REPOSITORY }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ secrets.DOCKER_REPOSITORY }}:${{ env.VERSION }}
           platforms: linux/amd64
 
   deploy:
