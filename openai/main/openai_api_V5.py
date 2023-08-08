@@ -1,9 +1,11 @@
 import os
 import openai
 import pymysql
-import prettytable
-from extract_metadata import get_metadata, CustomJsonEncoder
+from extract_metadata import get_metadata_mysql, get_metadata_mssql, get_metadata_postgresql, CustomJsonEncoder
 import json
+import pyodbc
+import psycopg2
+
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 openai.api_key = OPENAI_API_KEY
@@ -23,7 +25,7 @@ def chat(system_content, prompt_content):
             }
         ],
         temperature=0,
-        max_tokens=600,
+        max_tokens=1000,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
@@ -87,7 +89,7 @@ def format_output(output_text):
     return formatted_output_str
 
 
-def run_query(host, user, password, database, queries):
+def run_query_mysql(host, user, password, database, queries):
     connection = pymysql.connect(host=host, user=user, password=password, database=database)
     cursor = connection.cursor()
 
@@ -114,3 +116,49 @@ def run_query(host, user, password, database, queries):
 
     return tables
 
+def run_query_mssql(host, user, password, database, queries):
+    conn_str = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={host};DATABASE={database};UID={user};PWD={password}'
+    connection = pyodbc.connect(conn_str)
+    cursor = connection.cursor()
+
+    tables = []
+    try:
+        for query in queries:
+            cursor.execute(query)
+            result = cursor.fetchall()
+            if result:
+                field_names = [desc[0] for desc in cursor.description]
+                table = [dict(zip(field_names, row)) for row in result]
+                tables.append(table)
+            else:
+                tables.append("No results for the query.")
+    except Exception as e:
+        tables.append(f"Error executing query: {str(e)}")
+
+    cursor.close()
+    connection.close()
+
+    return tables
+
+def run_query_postgresql(host, user, password, database, queries):
+    connection = psycopg2.connect(host=host, user=user, password=password, dbname=database)
+    cursor = connection.cursor()
+
+    tables = []
+    try:
+        for query in queries:
+            cursor.execute(query)
+            result = cursor.fetchall()
+            if result:
+                field_names = [desc[0] for desc in cursor.description]
+                table = [dict(zip(field_names, row)) for row in result]
+                tables.append(table)
+            else:
+                tables.append("No results for the query.")
+    except Exception as e:
+        tables.append(f"Error executing query: {str(e)}")
+
+    cursor.close()
+    connection.close()
+
+    return tables

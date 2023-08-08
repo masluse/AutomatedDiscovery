@@ -9,7 +9,9 @@ COPY . .
 
 # Install the necessary dependencies
 RUN pip install --upgrade pip
-RUN pip install flask openai mysql-connector-python pymysql prettytable
+RUN pip install psycopg2-binary
+RUN sudo apt-get install libpq-dev -y
+RUN pip install flask openai mysql-connector-python pymysql prettytable pyodbc psycopg2
 
 # We specify the port on which the server runs (Flask runs on port 5000 by default)
 EXPOSE 5000
