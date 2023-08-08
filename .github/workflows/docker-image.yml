@@ -30,7 +30,7 @@ jobs:
         with:
           file: openai/main/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_REPOSITORY }}:latest
+          tags: ${{ secrets.DOCKER_REPOSITORY }}:${{ steps.docker_tags.outputs.tags }}
           platforms: linux/amd64
 
   deploy:
