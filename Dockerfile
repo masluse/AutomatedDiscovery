@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 
 WORKDIR /app
 
-COPY ./openai/main .
+COPY ./src/main .
 
 # Install system dependencies for pyodbc
 RUN apt-get update && apt-get install -y gnupg2 curl unixodbc-dev
