@@ -43,6 +43,30 @@ def Text_Process(img, output_path, processed_text, data):
       processed_data = [item for item in processed_data if item.strip() != '']
       processed_data = [item for item in processed_data if item.strip() != ' ']
 
+      raw_data = [item for item in data['text'] if item.strip() != '']
+      raw_data = [item for item in raw_data if item.strip() != ' ']
+
+      for i in range(len(raw_data)):
+            if raw_data[i] in processed_data[i] or processed_data[i] in raw_data[i]:
+                  pass
+            elif "[MASKED]" in processed_data[i]:
+                  pass
+            else:
+                  processed_data.insert(i-1, "[MASKED]")
+
+      differences = []
+      differences = []
+
+      for index, (a, b) in enumerate(zip(processed_data, raw_data)):
+            if a != b:
+                  differences.append((index, a, b))
+
+      print("Differences:")
+      for index, a, b in differences:
+            print(f"Index {index}: {a} != {b}")
+
+
+
       masked_indexes = []
       sorted_indexes = []
       for index in range(0, len(processed_data)):
@@ -58,12 +82,12 @@ def Text_Process(img, output_path, processed_text, data):
                   mi_i += 1
 
 
+      processed_masked = []
 
-
-     # print(masked_indexes)
-     # print(sorted_indexes)
-     # print(processed_data)
-     # print(data['text'])
+      print(masked_indexes)
+      print(sorted_indexes)
+      print(processed_data)
+      print(data['text'])
 
       for i in range(len(data['level'])):
             if i in sorted_indexes:

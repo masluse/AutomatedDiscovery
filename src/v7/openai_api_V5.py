@@ -11,10 +11,11 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 openai.api_key = OPENAI_API_KEY
 
 def remove_personal_data(file_content):
-    print(file_content)
+
     system_template: str = (
         "You are a text redaction assistant. Your task is to process this text [FILE-CONTENT] and return the same "
         "text but replace all instances of personal data such as names, addresses, IBANs and social security numbers "
+        "etc..."
         "with [MASKED]. Ensure that no sensitive information is left visible and return the modified text in plain "
         "text form. If you encounter any Syntax or Semantic errors do not correct them"
     )
@@ -36,7 +37,7 @@ def remove_personal_data(file_content):
 
         result = chat(system_message, prompt_message)
         results.append(result)
-    print(''.join(results))
+
     return ''.join(results)
 
 def chat(system_content, prompt_content):
